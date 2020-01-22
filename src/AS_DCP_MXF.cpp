@@ -241,6 +241,18 @@ ASDCP::EssenceType(const std::string& filename, EssenceType_t& type)
 	            type = ESS_AS02_ACES;
 	    }
 	  }
+	  if (type == ESS_UNKNOWN)
+	  {
+	    MXF::RGBAEssenceDescriptor *rgba_descriptor = 0;
+	    char buf[64];
+
+	    if ASDCP_SUCCESS(TestHeader.GetMDObjectByType(m_Dict->ul(MDD_RGBAEssenceDescriptor), reinterpret_cast<MXF::InterchangeObject**>(&rgba_descriptor)))
+	    {
+	        if (rgba_descriptor->EssenceContainer == m_Dict->ul(MDD_MXFGCFrameWrappedEssenceContainerProResPicture))
+	            type = ESS_AS02_ProRes;
+	    }
+	  }
+
 	  else if (ASDCP_SUCCESS(TestHeader.GetMDObjectByType(OBJ_TYPE_ARGS(CDCIEssenceDescriptor))) )
 	  {
 	    MXF::CDCIEssenceDescriptor *cdci_descriptor = 0;
