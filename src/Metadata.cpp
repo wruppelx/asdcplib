@@ -70,7 +70,7 @@ static InterchangeObject* GenericDataEssenceDescriptor_Factory(const Dictionary*
 static InterchangeObject* TimedTextDescriptor_Factory(const Dictionary*& Dict) { return new TimedTextDescriptor(Dict); }
 static InterchangeObject* TimedTextResourceSubDescriptor_Factory(const Dictionary*& Dict) { return new TimedTextResourceSubDescriptor(Dict); }
 static InterchangeObject* StereoscopicPictureSubDescriptor_Factory(const Dictionary*& Dict) { return new StereoscopicPictureSubDescriptor(Dict); }
-static InterchangeObject* ContainerConstraintSubDescriptor_Factory(const Dictionary*& Dict) { return new ContainerConstraintSubDescriptor(Dict); }
+static InterchangeObject* ContainerConstraintsSubDescriptor_Factory(const Dictionary*& Dict) { return new ContainerConstraintsSubDescriptor(Dict); }
 static InterchangeObject* NetworkLocator_Factory(const Dictionary*& Dict) { return new NetworkLocator(Dict); }
 static InterchangeObject* MCALabelSubDescriptor_Factory(const Dictionary*& Dict) { return new MCALabelSubDescriptor(Dict); }
 static InterchangeObject* AudioChannelLabelSubDescriptor_Factory(const Dictionary*& Dict) { return new AudioChannelLabelSubDescriptor(Dict); }
@@ -125,7 +125,7 @@ ASDCP::MXF::Metadata_InitTypes(const Dictionary*& Dict)
   SetObjectFactory(Dict->ul(MDD_TimedTextDescriptor), TimedTextDescriptor_Factory);
   SetObjectFactory(Dict->ul(MDD_TimedTextResourceSubDescriptor), TimedTextResourceSubDescriptor_Factory);
   SetObjectFactory(Dict->ul(MDD_StereoscopicPictureSubDescriptor), StereoscopicPictureSubDescriptor_Factory);
-  SetObjectFactory(Dict->ul(MDD_ContainerConstraintSubDescriptor), ContainerConstraintSubDescriptor_Factory);
+  SetObjectFactory(Dict->ul(MDD_ContainerConstraintsSubDescriptor), ContainerConstraintsSubDescriptor_Factory);
   SetObjectFactory(Dict->ul(MDD_NetworkLocator), NetworkLocator_Factory);
   SetObjectFactory(Dict->ul(MDD_MCALabelSubDescriptor), MCALabelSubDescriptor_Factory);
   SetObjectFactory(Dict->ul(MDD_AudioChannelLabelSubDescriptor), AudioChannelLabelSubDescriptor_Factory);
@@ -2129,6 +2129,18 @@ JPEG2000PictureSubDescriptor::InitFromTLVSet(TLVReader& TLVSet)
     result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(JPEG2000PictureSubDescriptor, J2CLayout));
     J2CLayout.set_has_value( result == RESULT_OK );
   }
+  if ( ASDCP_SUCCESS(result) ) {
+    result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KExtendedCapabilities));
+    J2KExtendedCapabilities.set_has_value( result == RESULT_OK );
+  }
+  if ( ASDCP_SUCCESS(result) ) {
+    result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KProfile));
+    J2KProfile.set_has_value( result == RESULT_OK );
+  }
+  if ( ASDCP_SUCCESS(result) ) {
+    result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KCorrespondingProfile));
+    J2KCorrespondingProfile.set_has_value( result == RESULT_OK );
+  }
   return result;
 }
 
@@ -2152,6 +2164,9 @@ JPEG2000PictureSubDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
   if ( ASDCP_SUCCESS(result)  && ! CodingStyleDefault.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, CodingStyleDefault));
   if ( ASDCP_SUCCESS(result)  && ! QuantizationDefault.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, QuantizationDefault));
   if ( ASDCP_SUCCESS(result)  && ! J2CLayout.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, J2CLayout));
+  if ( ASDCP_SUCCESS(result)  && ! J2KExtendedCapabilities.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KExtendedCapabilities));
+  if ( ASDCP_SUCCESS(result)  && ! J2KProfile.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KProfile));
+  if ( ASDCP_SUCCESS(result)  && ! J2KCorrespondingProfile.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(JPEG2000PictureSubDescriptor, J2KCorrespondingProfile));
   return result;
 }
 
@@ -2174,6 +2189,9 @@ JPEG2000PictureSubDescriptor::Copy(const JPEG2000PictureSubDescriptor& rhs)
   CodingStyleDefault = rhs.CodingStyleDefault;
   QuantizationDefault = rhs.QuantizationDefault;
   J2CLayout = rhs.J2CLayout;
+  J2KExtendedCapabilities = rhs.J2KExtendedCapabilities;
+  J2KProfile = rhs.J2KProfile;
+  J2KCorrespondingProfile = rhs.J2KCorrespondingProfile;
 }
 
 //
@@ -2208,6 +2226,17 @@ JPEG2000PictureSubDescriptor::Dump(FILE* stream)
   }
   if ( ! J2CLayout.empty() ) {
     fprintf(stream, "  %22s = %s\n",  "J2CLayout", J2CLayout.get().EncodeString(identbuf, IdentBufferLen));
+  }
+  if ( ! J2KExtendedCapabilities.empty() ) {
+    fprintf(stream, "  %22s = %s\n",  "J2KExtendedCapabilities", J2KExtendedCapabilities.get().EncodeString(identbuf, IdentBufferLen));
+  }
+  if ( ! J2KProfile.empty() ) {
+    fprintf(stream, "  %22s:\n",  "J2KProfile");
+  J2KProfile.get().Dump(stream);
+  }
+  if ( ! J2KCorrespondingProfile.empty() ) {
+    fprintf(stream, "  %22s:\n",  "J2KCorrespondingProfile");
+  J2KCorrespondingProfile.get().Dump(stream);
   }
 }
 
@@ -3076,6 +3105,18 @@ TimedTextDescriptor::InitFromTLVSet(TLVReader& TLVSet)
     result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(TimedTextDescriptor, RFC5646LanguageTagList));
     RFC5646LanguageTagList.set_has_value( result == RESULT_OK );
   }
+  if ( ASDCP_SUCCESS(result) ) {
+    result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(TimedTextDescriptor, DisplayType));
+    DisplayType.set_has_value( result == RESULT_OK );
+  }
+  if ( ASDCP_SUCCESS(result) ) {
+    result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(TimedTextDescriptor, IntrinsicPictureResolution));
+    IntrinsicPictureResolution.set_has_value( result == RESULT_OK );
+  }
+  if ( ASDCP_SUCCESS(result) ) { 
+    result = TLVSet.ReadUi8(OBJ_READ_ARGS_OPT(TimedTextDescriptor, ZPositionInUse));
+    ZPositionInUse.set_has_value( result == RESULT_OK );
+  }
   return result;
 }
 
@@ -3089,6 +3130,9 @@ TimedTextDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
   if ( ASDCP_SUCCESS(result) ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS(TimedTextDescriptor, UCSEncoding));
   if ( ASDCP_SUCCESS(result) ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS(TimedTextDescriptor, NamespaceURI));
   if ( ASDCP_SUCCESS(result)  && ! RFC5646LanguageTagList.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(TimedTextDescriptor, RFC5646LanguageTagList));
+  if ( ASDCP_SUCCESS(result)  && ! DisplayType.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(TimedTextDescriptor, DisplayType));
+  if ( ASDCP_SUCCESS(result)  && ! IntrinsicPictureResolution.empty() ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(TimedTextDescriptor, IntrinsicPictureResolution));
+  if ( ASDCP_SUCCESS(result)  && ! ZPositionInUse.empty() ) result = TLVSet.WriteUi8(OBJ_WRITE_ARGS_OPT(TimedTextDescriptor, ZPositionInUse));
   return result;
 }
 
@@ -3101,6 +3145,9 @@ TimedTextDescriptor::Copy(const TimedTextDescriptor& rhs)
   UCSEncoding = rhs.UCSEncoding;
   NamespaceURI = rhs.NamespaceURI;
   RFC5646LanguageTagList = rhs.RFC5646LanguageTagList;
+  DisplayType = rhs.DisplayType;
+  IntrinsicPictureResolution = rhs.IntrinsicPictureResolution;
+  ZPositionInUse = rhs.ZPositionInUse;
 }
 
 //
@@ -3119,6 +3166,15 @@ TimedTextDescriptor::Dump(FILE* stream)
   fprintf(stream, "  %22s = %s\n",  "NamespaceURI", NamespaceURI.EncodeString(identbuf, IdentBufferLen));
   if ( ! RFC5646LanguageTagList.empty() ) {
     fprintf(stream, "  %22s = %s\n",  "RFC5646LanguageTagList", RFC5646LanguageTagList.get().EncodeString(identbuf, IdentBufferLen));
+  }
+  if ( ! DisplayType.empty() ) {
+    fprintf(stream, "  %22s = %s\n",  "DisplayType", DisplayType.get().EncodeString(identbuf, IdentBufferLen));
+  }
+  if ( ! IntrinsicPictureResolution.empty() ) {
+    fprintf(stream, "  %22s = %s\n",  "IntrinsicPictureResolution", IntrinsicPictureResolution.get().EncodeString(identbuf, IdentBufferLen));
+  }
+  if ( ! ZPositionInUse.empty() ) {
+    fprintf(stream, "  %22s = %d\n",  "ZPositionInUse", ZPositionInUse.get());
   }
 }
 
@@ -3291,27 +3347,27 @@ StereoscopicPictureSubDescriptor::WriteToBuffer(ASDCP::FrameBuffer& Buffer)
 }
 
 //------------------------------------------------------------------------------------------
-// ContainerConstraintSubDescriptor
+// ContainerConstraintsSubDescriptor
 
 //
 
-ContainerConstraintSubDescriptor::ContainerConstraintSubDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d)
+ContainerConstraintsSubDescriptor::ContainerConstraintsSubDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d)
 {
   assert(m_Dict);
-  m_UL = m_Dict->ul(MDD_ContainerConstraintSubDescriptor);
+  m_UL = m_Dict->ul(MDD_ContainerConstraintsSubDescriptor);
 }
 
-ContainerConstraintSubDescriptor::ContainerConstraintSubDescriptor(const ContainerConstraintSubDescriptor& rhs) : InterchangeObject(rhs.m_Dict), m_Dict(rhs.m_Dict)
+ContainerConstraintsSubDescriptor::ContainerConstraintsSubDescriptor(const ContainerConstraintsSubDescriptor& rhs) : InterchangeObject(rhs.m_Dict), m_Dict(rhs.m_Dict)
 {
   assert(m_Dict);
-  m_UL = m_Dict->ul(MDD_ContainerConstraintSubDescriptor);
+  m_UL = m_Dict->ul(MDD_ContainerConstraintsSubDescriptor);
   Copy(rhs);
 }
 
 
 //
 ASDCP::Result_t
-ContainerConstraintSubDescriptor::InitFromTLVSet(TLVReader& TLVSet)
+ContainerConstraintsSubDescriptor::InitFromTLVSet(TLVReader& TLVSet)
 {
   assert(m_Dict);
   Result_t result = InterchangeObject::InitFromTLVSet(TLVSet);
@@ -3320,7 +3376,7 @@ ContainerConstraintSubDescriptor::InitFromTLVSet(TLVReader& TLVSet)
 
 //
 ASDCP::Result_t
-ContainerConstraintSubDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
+ContainerConstraintsSubDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
 {
   assert(m_Dict);
   Result_t result = InterchangeObject::WriteToTLVSet(TLVSet);
@@ -3329,14 +3385,14 @@ ContainerConstraintSubDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
 
 //
 void
-ContainerConstraintSubDescriptor::Copy(const ContainerConstraintSubDescriptor& rhs)
+ContainerConstraintsSubDescriptor::Copy(const ContainerConstraintsSubDescriptor& rhs)
 {
   InterchangeObject::Copy(rhs);
 }
 
 //
 void
-ContainerConstraintSubDescriptor::Dump(FILE* stream)
+ContainerConstraintsSubDescriptor::Dump(FILE* stream)
 {
   char identbuf[IdentBufferLen];
   *identbuf = 0;
@@ -3349,14 +3405,14 @@ ContainerConstraintSubDescriptor::Dump(FILE* stream)
 
 //
 ASDCP::Result_t
-ContainerConstraintSubDescriptor::InitFromBuffer(const byte_t* p, ui32_t l)
+ContainerConstraintsSubDescriptor::InitFromBuffer(const byte_t* p, ui32_t l)
 {
   return InterchangeObject::InitFromBuffer(p, l);
 }
 
 //
 ASDCP::Result_t
-ContainerConstraintSubDescriptor::WriteToBuffer(ASDCP::FrameBuffer& Buffer)
+ContainerConstraintsSubDescriptor::WriteToBuffer(ASDCP::FrameBuffer& Buffer)
 {
   return InterchangeObject::WriteToBuffer(Buffer);
 }

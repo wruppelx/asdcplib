@@ -571,6 +571,9 @@ namespace ASDCP
           optional_property<Raw > CodingStyleDefault;
           optional_property<Raw > QuantizationDefault;
           optional_property<RGBALayout > J2CLayout;
+          optional_property<J2KExtendedCapabilitiesType > J2KExtendedCapabilities;
+          optional_property<Array<Kumu::ArchivableUi16> > J2KProfile;
+          optional_property<Array<Kumu::ArchivableUi16> > J2KCorrespondingProfile;
 
       JPEG2000PictureSubDescriptor(const Dictionary*& d);
       JPEG2000PictureSubDescriptor(const JPEG2000PictureSubDescriptor& rhs);
@@ -807,6 +810,9 @@ namespace ASDCP
           UTF16String UCSEncoding;
           UTF16String NamespaceURI;
           optional_property<UTF16String > RFC5646LanguageTagList;
+          optional_property<UTF16String > DisplayType;
+          optional_property<UTF16String > IntrinsicPictureResolution;
+          optional_property<ui8_t > ZPositionInUse;
 
       TimedTextDescriptor(const Dictionary*& d);
       TimedTextDescriptor(const TimedTextDescriptor& rhs);
@@ -870,20 +876,20 @@ namespace ASDCP
 	};
 
       //
-      class ContainerConstraintSubDescriptor : public InterchangeObject
+      class ContainerConstraintsSubDescriptor : public InterchangeObject
 	{
-	  ContainerConstraintSubDescriptor();
+	  ContainerConstraintsSubDescriptor();
 
 	public:
 	  const Dictionary*& m_Dict;
 
-      ContainerConstraintSubDescriptor(const Dictionary*& d);
-      ContainerConstraintSubDescriptor(const ContainerConstraintSubDescriptor& rhs);
-      virtual ~ContainerConstraintSubDescriptor() {}
+      ContainerConstraintsSubDescriptor(const Dictionary*& d);
+      ContainerConstraintsSubDescriptor(const ContainerConstraintsSubDescriptor& rhs);
+      virtual ~ContainerConstraintsSubDescriptor() {}
 
-      const ContainerConstraintSubDescriptor& operator=(const ContainerConstraintSubDescriptor& rhs) { Copy(rhs); return *this; }
-      virtual void Copy(const ContainerConstraintSubDescriptor& rhs);
-      virtual const char* HasName() { return "ContainerConstraintSubDescriptor"; }
+      const ContainerConstraintsSubDescriptor& operator=(const ContainerConstraintsSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const ContainerConstraintsSubDescriptor& rhs);
+      virtual const char* HasName() { return "ContainerConstraintsSubDescriptor"; }
       virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
       virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
       virtual void     Dump(FILE* = 0);

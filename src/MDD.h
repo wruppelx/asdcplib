@@ -408,7 +408,7 @@ namespace ASDCP {
 	MDD_WAVWrappingClip, // 370
 	MDD_DBOXMotionCodePrimaryStream, // 371
 	MDD_DBOXMotionCodeSecondaryStream, // 372
-	MDD_ContainerConstraintSubDescriptor, // 373
+	MDD_ContainerConstraintsSubDescriptor, // 373
 	MDD_PHDRImageMetadataWrappingFrame, // 374
 	MDD_PHDRImageMetadataItem, // 375
 	MDD_PHDRMetadataTrackSubDescriptor, // 376
@@ -554,6 +554,16 @@ namespace ASDCP {
 	MDD_ACESUncompressedMonoscopicWithAlpha, // 516
 	MDD_ACESFrameWrappedEssence, // 517
 	MDD_DCAudioChannel_FSKSyncSignalChannel, // 518
+	MDD_JPEG2000PictureSubDescriptor_J2KExtendedCapabilities, // 519
+	MDD_JPEG2000PictureSubDescriptor_J2KProfile, // 520
+	MDD_JPEG2000PictureSubDescriptor_J2KCorrespondingProfile, // 521
+	MDD_J2KExtendedCapabilities, // 522
+	MDD_HTJ2KPictureCodingScheme, // 523
+	MDD_HTJ2KPictureCodingSchemeGeneric, // 524
+	MDD_AudioChannelSLVS, // 525
+	MDD_TimedTextDescriptor_DisplayType, // 526
+	MDD_TimedTextDescriptor_IntrinsicPictureResolution, // 527
+	MDD_TimedTextDescriptor_ZPositionInUse, // 528
 	MDD_Max
     }; // enum MDD_t
 
