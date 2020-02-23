@@ -564,6 +564,10 @@ namespace ASDCP {
 	MDD_TimedTextDescriptor_DisplayType, // 526
 	MDD_TimedTextDescriptor_IntrinsicPictureResolution, // 527
 	MDD_TimedTextDescriptor_ZPositionInUse, // 528
+	MDD_IABEssenceDescriptor, // 529
+	MDD_IABSoundfieldLabelSubDescriptor, // 530
+	MDD_IABSoundfield, // 531
+	MDD_MXFGCFrameWrappedEssenceContainerProResPicture, // 532
 	MDD_Max
     }; // enum MDD_t
 
