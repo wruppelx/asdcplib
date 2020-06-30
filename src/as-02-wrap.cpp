@@ -141,6 +141,7 @@ Options:\n\
   -c <num>          - Select the IMF color system to be signaled:\n\
                       Application 2 (2067-20): 1, 2, or 3\n\
                       Application 2e (2067-21): 4 or 5\n\
+                      Application 4 DCDM (2067-40): 6\n\
                       All color system values assume YCbCr; also use -R for RGB\n\
   -C <ul>           - Set ChannelAssignment UL value\n\
   -d <duration>     - Number of frames to process, default all\n\
@@ -285,6 +286,8 @@ public:
   Kumu::PathList_t filenames;  // list of filenames to be processed
 
   UL channel_assignment, picture_coding, transfer_characteristic, color_primaries, coding_equations;
+  ASDCP::MXF::RGBALayout pixel_layout;
+  ASDCP::MXF::InterchangeObject_list_t essence_sub_descriptors;
   ASDCP::MXF::AS02_MCAConfigParser mca_config;
   std::string language;
 
@@ -420,6 +423,7 @@ public:
   bool set_color_system_from_arg(const char* arg)
   {
     assert(arg);
+	ASDCP::MXF::JPEG2000PictureSubDescriptor* j2k_sub = new ASDCP::MXF::JPEG2000PictureSubDescriptor(g_dict);
 
     switch ( *arg )
       {
@@ -458,6 +462,20 @@ public:
 	transfer_characteristic = g_dict->ul(MDD_TransferCharacteristic_ITU2020);
 	color_primaries = g_dict->ul(MDD_ColorPrimaries_ITU2020);
 	use_cdci_descriptor = true;
+	break;
+
+	// Application 4 DCDM (ST 2067-40)
+      case '6':
+	coding_equations.Reset();
+	transfer_characteristic = g_dict->ul(MDD_TransferCharacteristic_CinemaMezzanineDCDM);
+	color_primaries = g_dict->ul(MDD_ColorPrimaries_CinemaMezzanine);
+	use_cdci_descriptor = false;
+	component_depth = 12;
+	rgba_MinRef = 0;
+	rgba_MaxRef = 4095;
+	pixel_layout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_App4DCDM);
+	j2k_sub->J2CLayout = pixel_layout;
+	essence_sub_descriptors.push_back(j2k_sub);
 	break;
 
       default:
@@ -1021,7 +1039,8 @@ write_JP2K_file(CommandOptions& Options)
 
 	  if ( ASDCP_SUCCESS(result) )
 	    {
-	      tmp_dscr->CodingEquations = Options.coding_equations;
+	      if (Options.coding_equations.HasValue())
+	          tmp_dscr->CodingEquations = Options.coding_equations;
 	      tmp_dscr->TransferCharacteristic = Options.transfer_characteristic;
 	      tmp_dscr->ColorPrimaries = Options.color_primaries;
 	      tmp_dscr->PictureEssenceCoding = Options.picture_coding;
@@ -1054,7 +1073,14 @@ write_JP2K_file(CommandOptions& Options)
       else
 	{ // use RGB
 	  ASDCP::MXF::RGBAEssenceDescriptor* tmp_dscr = new ASDCP::MXF::RGBAEssenceDescriptor(g_dict);
-	  essence_sub_descriptors.push_back(new ASDCP::MXF::JPEG2000PictureSubDescriptor(g_dict));
+	  if (Options.essence_sub_descriptors.empty())
+	    {
+		  essence_sub_descriptors.push_back(new ASDCP::MXF::JPEG2000PictureSubDescriptor(g_dict));
+	    }
+	  else
+	    {
+		  essence_sub_descriptors.push_back(Options.essence_sub_descriptors.front());
+	    }
 	  
 	  result = ASDCP::JP2K_PDesc_to_MD(PDesc, *g_dict,
 					   *static_cast<ASDCP::MXF::GenericPictureEssenceDescriptor*>(tmp_dscr),
@@ -1062,7 +1088,8 @@ write_JP2K_file(CommandOptions& Options)
 
 	  if ( ASDCP_SUCCESS(result) )
 	    {
-	      tmp_dscr->CodingEquations = Options.coding_equations;
+	      if (Options.coding_equations.HasValue())
+	          tmp_dscr->CodingEquations = Options.coding_equations;
 	      tmp_dscr->TransferCharacteristic = Options.transfer_characteristic;
 	      tmp_dscr->ColorPrimaries = Options.color_primaries;
 	      tmp_dscr->ScanningDirection = 0;
@@ -1082,6 +1109,7 @@ write_JP2K_file(CommandOptions& Options)
 		  tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
 		  tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
 		}
+	      if ( Options.pixel_layout.HasValue()) tmp_dscr->PixelLayout = Options.pixel_layout;
 
 	      essence_descriptor = static_cast<ASDCP::MXF::FileDescriptor*>(tmp_dscr);
 	    }
