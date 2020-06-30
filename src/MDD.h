@@ -564,6 +564,7 @@ namespace ASDCP {
 	MDD_TimedTextDescriptor_DisplayType, // 526
 	MDD_TimedTextDescriptor_IntrinsicPictureResolution, // 527
 	MDD_TimedTextDescriptor_ZPositionInUse, // 528
+	MDD_TransferCharacteristic_CinemaMezzanineDCDM, //529
 	MDD_Max
     }; // enum MDD_t
 
