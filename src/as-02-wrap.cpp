@@ -1027,6 +1027,11 @@ write_JP2K_file(CommandOptions& Options)
           fprintf(stderr, "Frame Buffer size: %u\n", Options.fb_size);
 	  JP2K::PictureDescriptorDump(PDesc);
 	}
+      if(PDesc.ExtendedCapabilities.Pcap == 0x20000) // if HTJ2K is signaled in the codestream, set PictureCompression to HTJ2KPictureCodingSchemeGeneric
+    {
+        if (Options.picture_coding.HasValue()) Options.picture_coding.Reset();
+        Options.picture_coding = UL(g_dict->ul(MDD_HTJ2KPictureCodingSchemeGeneric));
+	}
 
       if ( Options.use_cdci_descriptor )
 	{
@@ -1092,7 +1097,6 @@ write_JP2K_file(CommandOptions& Options)
 	          tmp_dscr->CodingEquations = Options.coding_equations;
 	      tmp_dscr->TransferCharacteristic = Options.transfer_characteristic;
 	      tmp_dscr->ColorPrimaries = Options.color_primaries;
-	      tmp_dscr->ScanningDirection = 0;
 	      tmp_dscr->PictureEssenceCoding = Options.picture_coding;
 	      tmp_dscr->ComponentMaxRef = Options.rgba_MaxRef;
 	      tmp_dscr->ComponentMinRef = Options.rgba_MinRef;
