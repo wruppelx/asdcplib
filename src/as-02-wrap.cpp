@@ -1027,12 +1027,14 @@ write_JP2K_file(CommandOptions& Options)
           fprintf(stderr, "Frame Buffer size: %u\n", Options.fb_size);
 	  JP2K::PictureDescriptorDump(PDesc);
 	}
-      if(PDesc.ExtendedCapabilities.Pcap == 0x20000) // if HTJ2K is signaled in the codestream, set PictureCompression to HTJ2KPictureCodingSchemeGeneric
+      if(PDesc.ExtendedCapabilities.N != JP2K::NoExtendedCapabilitiesSignaled)
     {
-        if (Options.picture_coding.HasValue()) Options.picture_coding.Reset();
-        Options.picture_coding = UL(g_dict->ul(MDD_HTJ2KPictureCodingSchemeGeneric));
-	}
-
+          if(PDesc.ExtendedCapabilities.Pcap == 0x20000) // if HTJ2K is signaled in the codestream, set PictureCompression to HTJ2KPictureCodingSchemeGeneric
+        {
+            if (Options.picture_coding.HasValue()) Options.picture_coding.Reset();
+            Options.picture_coding = UL(g_dict->ul(MDD_HTJ2KPictureCodingSchemeGeneric));
+	    }
+    }
       if ( Options.use_cdci_descriptor )
 	{
 	  ASDCP::MXF::CDCIEssenceDescriptor* tmp_dscr = new ASDCP::MXF::CDCIEssenceDescriptor(g_dict);
